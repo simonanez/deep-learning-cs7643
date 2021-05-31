@@ -122,37 +122,38 @@ def generate_batched_data(data, label, batch_size=32, shuffle=False, seed=None):
 
     # initialize shuffle variables.
     shuffle_indices = []
-
-    # # if shuffle is true, choose index to be random integer from all the data set.
-    # if shuffle:
-    #     for i in range(batch_size):
-    #         idx = random.randint(1,lengthOfData)
-    #
-    #         # initialize shuffle.
-    #         if idx in shuffle_indices:
-    #             shuffle_bool = True
-    #         else:
-    #             shuffle_bool = False
-    #
-    #         #if index has already been chosen, shuffle until index has not been chosen.
-    #         while shuffle_bool:
-    #             idx = random.randint(1, lengthOfData)
-    #             if idx not in shuffle_indices:
-    #                 shuffle_bool = False
-    #
-    #         shuffle_indices.append(idx)
-    #         batched_data.append(np.array(data[idx]))
-    #         batched_label.append(label[idx])
-    # else:
-    for i in range(lengthOfIterations):
-        for j in range(batch_size):
+    indices = range(1,lengthOfData)
+    # if shuffle is true, choose index to be random integer from all the data set.
+    if shuffle:
+        for i in range(lengthOfIterations):
+            # initialize for each iteration
             arr_data = []
             arr_label = []
-            arr_data.append(data[i*63 + j])
-            arr_label.append(label[i*63+j])
+            for j in range(batch_size):
+                #choose index from available indices.
+                lengthOfAvailableIdx = len(indices)
+                idx = random.randint(1,lengthOfAvailableIdx)
 
-        batched_data.append(np.array(arr_data))
-        batched_label.append(np.array(arr_label))
+                # remove index from list of available indices.
+                indices.remove(idx)
+
+                # append data from chosen index.
+                arr_data.append(data[idx])
+                arr_label.append(label[idx])
+
+            # append data.
+            batched_data.append(np.array(arr_data))
+            batched_label.append(np.array(arr_label))
+    else:
+        for i in range(lengthOfIterations):
+            arr_data = []
+            arr_label = []
+            for j in range(batch_size):
+                arr_data.append(data[i*63 + j])
+                arr_label.append(label[i*63+j])
+
+            batched_data.append(np.array(arr_data))
+            batched_label.append(np.array(arr_label))
 
 
     #############################################################################
