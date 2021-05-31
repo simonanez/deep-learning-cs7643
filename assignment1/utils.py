@@ -50,12 +50,6 @@ def load_mnist_trainval():
     train_label = None
     val_data = None
     val_label = None
-    #############################################################################
-    # TODO:                                                                     #
-    #    1) Split the entire training set to training data and validation       #
-    #       data. Use 80% of your data for training and 20% of your data for    #
-    #       validation. Note: Don't shuffle here.                               #
-    #############################################################################
 
     # initialize lengths
     lengthOfData = len(data)
@@ -77,9 +71,6 @@ def load_mnist_trainval():
             val_data[j] = data[i]
             val_label.append(label[i])
             j = j +1
-    #############################################################################
-    #                              END OF YOUR CODE                             #
-    #############################################################################
 
     return train_data, train_label, val_data, val_label
 
@@ -123,6 +114,38 @@ def generate_batched_data(data, label, batch_size=32, shuffle=False, seed=None):
     #    It's okay if the size of your last batch is smaller than the required  #
     #    batch size                                                             #
     #############################################################################
+    lengthOfData = len(data)
+    # initialize containers
+    batched_data = []
+    batched_label = []
+
+    # initialize shuffle variables.
+    shuffle_indices = []
+    # if shuffle is true, choose index to be random integer from all the data set.
+    if shuffle:
+        for i in range(batch_size):
+            idx = random.randint(1,lengthOfData)
+
+            # initialize shuffle.
+            if idx in shuffle_indices:
+                shuffle_bool = True
+            else:
+                shuffle_bool = False
+
+            #if index has already been chosen, shuffle until index has not been chosen.
+            while shuffle_bool:
+                idx = random.randint(1, lengthOfData)
+                if idx not in shuffle_indices:
+                    shuffle_bool = False
+
+            shuffle_indices.append(idx)
+            batched_data.append(np.array(data[idx]))
+            batched_label.append(label[idx])
+    else:
+        for i in range(batch_size):
+            batched_data.append(np.array(data[i]))
+            batched_label.append(label[i])
+
 
     #############################################################################
     #                              END OF YOUR CODE                             #
