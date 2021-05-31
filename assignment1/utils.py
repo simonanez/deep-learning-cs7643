@@ -57,6 +57,26 @@ def load_mnist_trainval():
     #       validation. Note: Don't shuffle here.                               #
     #############################################################################
 
+    # initialize lengths
+    lengthOfData = len(data)
+    lengthOfTrainingData = int(lengthOfData*0.8)
+    lengthOfValData = int(lengthOfData*0.2)
+    # initialize training and validation data / label .
+    train_data = [[] for i in range(lengthOfTrainingData)]
+    val_data = [[] for i in range(lengthOfValData)]
+    val_label = []
+    train_label = []
+    #initialize indexing
+    j = 0
+    #loop thru the data. if within 80%, capture training data. else, capture validation data.
+    for i in range(lengthOfData):
+        if i < lengthOfTrainingData:
+            train_data[i] = data[i]
+            train_label.append(label[i])
+        else:
+            val_data[j] = data[i]
+            val_label.append(label[i])
+            j = j +1
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
