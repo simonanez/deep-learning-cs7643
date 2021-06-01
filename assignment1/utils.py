@@ -121,8 +121,8 @@ def generate_batched_data(data, label, batch_size=32, shuffle=False, seed=None):
     batched_label = []
 
     # initialize shuffle variables.
-    shuffle_indices = []
-    indices = range(1,lengthOfData)
+    indices = [*range(0,lengthOfData)]
+
     # if shuffle is true, choose index to be random integer from all the data set.
     if shuffle:
         for i in range(lengthOfIterations):
@@ -132,12 +132,16 @@ def generate_batched_data(data, label, batch_size=32, shuffle=False, seed=None):
             for j in range(batch_size):
                 #choose index from available indices.
                 lengthOfAvailableIdx = len(indices)
-                idx = random.randint(1,lengthOfAvailableIdx)
+                indices_idx = random.randint(0,lengthOfAvailableIdx-1)
+
+                #get the index to use.
+                idx = indices[indices_idx]
 
                 # remove index from list of available indices.
                 indices.remove(idx)
 
-                # append data from chosen index.
+
+                # append data from chosen index. use index list.
                 arr_data.append(data[idx])
                 arr_label.append(label[idx])
 
@@ -149,8 +153,8 @@ def generate_batched_data(data, label, batch_size=32, shuffle=False, seed=None):
             arr_data = []
             arr_label = []
             for j in range(batch_size):
-                arr_data.append(data[i*63 + j])
-                arr_label.append(label[i*63+j])
+                arr_data.append(data[i*batch_size + j])
+                arr_label.append(label[i*batch_size + j])
 
             batched_data.append(np.array(arr_data))
             batched_label.append(np.array(arr_label))
