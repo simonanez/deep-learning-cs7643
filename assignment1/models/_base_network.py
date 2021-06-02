@@ -28,11 +28,14 @@ class _baseNetwork:
         # TODO:                                                                     #
         #    1) Calculate softmax scores of input images                            #
         #############################################################################
-
+        maxes = np.max(scores, axis =1)                             # record row maxes
+        shifted_scores = (scores.transpose() - maxes).transpose()   # subtract max from each row
+        num = np.exp(shifted_scores)                                # e^(score - max(score)) for each row.
+        sum_rows = np.sum(num, axis=1)                              # sum e^(xi) across all i in a row.
+        prob = num / sum_rows[:,None]                               # probability result.
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
-
         return prob
 
     def cross_entropy_loss(self, x_pred, y):
@@ -47,7 +50,10 @@ class _baseNetwork:
         # TODO:                                                                     #
         #    1) Implement Cross-Entropy Loss                                        #
         #############################################################################
-
+        selected_probabilities = x_pred[ range(x_pred.shape[0]), y]     # select probabilities corresponding to ground truth label.
+        log_likelihood = -np.log(selected_probabilities)                # calc losses - log probabilities of all the selected probabilities.
+        sum_losses = np.sum(log_likelihood)                             # sum over all log probabilities (losses)
+        loss = sum_losses / x_pred.shape[1]                             # expected loss, average loss over all losses.
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -65,7 +71,9 @@ class _baseNetwork:
         # TODO:                                                                     #
         #    1) Implement the accuracy function                                     #
         #############################################################################
-
+        y_hat = np.argmax(x_pred, axis=1)           # get predicted value of y.
+        count_correct = np.sum(y_hat == y)          # count how many times y predicted matches y actual.
+        acc = count_correct / y.shape[0]            # num correct / total number of cases.
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -79,11 +87,11 @@ class _baseNetwork:
         :return:
             out: the value after the sigmoid activation is applied to the input (N, layer size)
         '''
-        out = None
         #############################################################################
         # TODO: Comput the sigmoid activation on the input                          #
         #############################################################################
-
+        denom = 1 + np.exp(-X)
+        out = np.reciprocal(denom)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -95,12 +103,11 @@ class _baseNetwork:
         :param x: Input data
         :return: The derivative of sigmoid function at x
         '''
-        ds = None
         #############################################################################
         # TODO:                                                                     #
         #    1) Implement the derivative of Sigmoid function                        #
         #############################################################################
-
+        ds = self.sigmoid(x) * (1 - self.sigmoid(x))
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -114,11 +121,10 @@ class _baseNetwork:
         :return:
             out: the value after the ReLU activation is applied to the input (N, layer size)
         '''
-        out = None
         #############################################################################
         # TODO: Comput the ReLU activation on the input                          #
         #############################################################################
-
+        out = X.clip(min=0)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -132,11 +138,11 @@ class _baseNetwork:
         :return:
             out: gradient of ReLU given input X
         '''
-        out = None
         #############################################################################
         # TODO: Comput the gradient of ReLU activation                              #
         #############################################################################
-
+        out = X.clip(min=0)
+        out[out>0] = 1
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
