@@ -65,6 +65,7 @@ class SoftmaxRegression(_baseNetwork):
         #############################################################################
         dLdt = prob_t
         dLdt[range(y.shape[0]), y] -= 1 #good?
+        dLdt = dLdt/ y.shape[0]
         dtdz = self.ReLU_dev(z)  #good.  (64, 10)
         dLdz = np.multiply(dLdt,dtdz)
         dzdx = X.transpose()     # good  (784, 64)
