@@ -53,7 +53,7 @@ class _baseNetwork:
         selected_probabilities = x_pred[ range(x_pred.shape[0]), y]     # select probabilities corresponding to ground truth label.
         log_likelihood = -np.log(selected_probabilities)                # calc losses - log probabilities of all the selected probabilities.
         sum_losses = np.sum(log_likelihood)                             # sum over all log probabilities (losses)
-        loss = sum_losses / x_pred.shape[1]                             # expected loss, average loss over all losses.
+        loss = sum_losses / x_pred.shape[0]                             # expected loss, average loss over all losses.
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
