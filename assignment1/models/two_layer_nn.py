@@ -62,7 +62,17 @@ class TwoLayerNet(_baseNetwork):
         #    2) Compute Cross-Entropy Loss and batch accuracy based on network      #
         #       outputs                                                             #
         #############################################################################
+        weightss1 = self.weights['W1']
+        weightss2 = self.weights['b1']
+        weightss3 = self.weights['W2']
+        weightss4 = self.weights['b2']
 
+        z = np.matmul(X ,self.weights['W1']) + self.weights['b1']           # compute z based off first weights and bias. (64*784)*(784*128) + 128*1 . X= 64*784. 64 batch. 784 per batch. transform 784->128. 64*128
+        k = self.sigmoid(z)                                                 # compute z based off sigmoid (in between)
+        t = np.matmul(k ,self.weights['W2']) + self.weights['b2']           # compute z based off second weights and bias
+        prob_t = self.softmax(t)                                            # compute softmax.
+        loss = self.cross_entropy_loss(prob_t, y)                           # compute cross entropy loss.
+        accuracy = self.compute_accuracy(prob_t, y)                         # compute accuracy
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -78,11 +88,40 @@ class TwoLayerNet(_baseNetwork):
         #          the sigmoid function in self.sigmoid_dev first                   #
         #############################################################################
 
+        # deriving cross entropy derivative
+        dLdt = prob_t
+        dLdt[range(y.shape[0]), y] -= 1
+        dLdt = dLdt / y.shape[0]
+
+        # deriving derivatives with respect to bias 2 and weights 2.
+        dtdb2 = np.ones(dLdt.shape[0])
+        dtdW2 = k.transpose()
+
+        # deriving chain rule derivatives for derivatives of bias 1 and weights 1.
+        dtdk = self.weights['W2'].transpose()
+        dkdz = self.sigmoid_dev(z)
+        dzdW1 = X.transpose()
+        dzdb1 = np.ones(X.shape[0])
+
+        # applying chain rule to solve for derivatives of bias 1 and weights 1.
+        dLdk = np.matmul(dLdt,dtdk)
+        dLdz = np.multiply(dLdk, dkdz)
+        dLdW1 = np.matmul(dzdW1,dLdz)
+        dLdb1 = np.matmul(dLdz.transpose(), dzdb1)
+
+        # applying chain rule to solve for derivatives of bias 2 and weights 2.
+        dLdW2 = np.matmul(dtdW2,dLdt)
+        dLdb2 = np.matmul(dLdt.transpose() , dtdb2)
+
+        #
+        self.gradients['W1'] = dLdW1
+        self.gradients['b1'] = dLdb1
+        self.gradients['W2'] = dLdW2
+        self.gradients['b2'] = dLdb2
+
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
-
-
         return loss, accuracy
 
 
