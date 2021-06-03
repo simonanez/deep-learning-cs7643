@@ -120,34 +120,24 @@ def generate_batched_data(data, label, batch_size=32, shuffle=False, seed=None):
     batched_data = []
     batched_label = []
 
-    # initialize shuffle variables.
-    indices = [*range(0,lengthOfData)]
-
-    # if shuffle is true, choose index to be random integer from all the data set.
+    # if shuffle is true, shuffle data and label together based on seed given.
     if shuffle:
+        temp = list(zip(data, label))
+        random.shuffle(temp)
+        res1, res2 = zip(*temp)
+        # once data and label is shuffled, partition the shuffled data into batches
         for i in range(lengthOfIterations):
-            # initialize for each iteration
             arr_data = []
             arr_label = []
+            # gather a batch by appending into arr_data, and arr_label
             for j in range(batch_size):
-                #choose index from available indices.
-                lengthOfAvailableIdx = len(indices)
-                indices_idx = random.randint(0,lengthOfAvailableIdx-1)
-
-                #get the index to use.
-                idx = indices[indices_idx]
-
-                # remove index from list of available indices.
-                indices.remove(idx)
-
-
-                # append data from chosen index. use index list.
-                arr_data.append(data[idx])
-                arr_label.append(label[idx])
-
-            # append data.
+                arr_data.append(res1[i*batch_size + j])
+                arr_label.append(res2[i*batch_size + j])
+            # append arr_data and arr_label batch into "batched_data" and "batched_label"
             batched_data.append(np.array(arr_data))
             batched_label.append(np.array(arr_label))
+        return batched_data, batched_label
+
     else:
         for i in range(lengthOfIterations):
             arr_data = []
