@@ -18,6 +18,10 @@ class SGD(_BaseOptimizer):
         #############################################################################
         if len(model.weights) < 2:
             model.weights['W1'] = model.weights['W1']  - self.learning_rate * model.gradients['W1']
+        else:
+            model.weights['W1'] = model.weights['W1']  - self.learning_rate * model.gradients['W1']
+            model.weights['W2'] = model.weights['W2']  - self.learning_rate * model.gradients['W2']
+
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################

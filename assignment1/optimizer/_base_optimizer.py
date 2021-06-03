@@ -20,6 +20,9 @@ class _BaseOptimizer:
         #############################################################################
         if len(model.weights) < 2:
             model.gradients['W1'] = model.gradients['W1'] + self.reg * model.weights['W1']
+        else:
+            model.gradients['W1'] = model.gradients['W1'] + self.reg * model.weights['W1']
+            model.gradients['W2'] = model.gradients['W2'] + self.reg * model.weights['W2']
 
         #############################################################################
         #                              END OF YOUR CODE                             #
