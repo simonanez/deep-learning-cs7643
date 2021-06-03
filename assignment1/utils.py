@@ -254,7 +254,23 @@ def plot_curves(train_loss_history, train_acc_history, valid_loss_history, valid
     #    1) Plot learning curves of training and validation loss                #
     #    2) Plot learning curves of training and validation accuracy            #
     #############################################################################
+    fig0 = plt.figure(0)
+    plt.title("Loss vs. Epochs")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.plot(train_loss_history, color="blue", label="train")
+    plt.plot(valid_loss_history, "r-", label="valid")
+    plt.legend(loc ="upper right")
 
+    fig3 = plt.figure(3)
+    plt.title("Accuracy vs. Epochs")
+    plt.xlabel("Epochs")
+    plt.ylabel("Accuracy")
+    plt.plot(train_acc_history, color="blue", label="train")
+    plt.plot(valid_acc_history, "r-", label="valid")
+    plt.legend(loc="upper right")
+    
+    plt.show()
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
