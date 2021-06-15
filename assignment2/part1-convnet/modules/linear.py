@@ -34,7 +34,12 @@ class Linear:
         # TODO: Implement the forward pass.                                         #
         #    HINT: You may want to flatten the input first                          #
         #############################################################################
+        # initialize container to store x.
+        xx = np.empty((x.shape[0],self.in_dim))
+        for i in range(0, x.shape[0]):
+            xx[i] = x[i].flatten()
 
+        out = np.matmul(xx, self.weight) + self.bias
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -48,10 +53,17 @@ class Linear:
         :return: nothing but dx, dw, and db of self should be updated
         '''
         x = self.cache
+        #flatten x and store in xx.
+        xx = np.empty((x.shape[0], self.in_dim))
+        for i in range(0, x.shape[0]):
+            xx[i] = x[i].flatten()
         #############################################################################
         # TODO: Implement the linear backward pass.                                 #
         #############################################################################
-
+        self.dx = np.matmul(dout, self.weight.transpose())
+        self.dx = self.dx.reshape(x.shape)
+        self.db = np.matmul(dout.transpose(), np.ones(x.shape[0]))
+        self.dw = np.matmul(xx.transpose() , dout)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
