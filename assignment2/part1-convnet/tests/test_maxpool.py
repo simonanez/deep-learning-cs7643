@@ -40,10 +40,8 @@ class TestConv(unittest.TestCase):
     def test_backward(self):
         x = np.random.randn(3, 2, 8, 8)
         dout = np.random.randn(3, 2, 4, 4)
-
-
-
         dx_num = eval_numerical_gradient_array(lambda x: self._pool_forward(x), x, dout)
+
         pool = MaxPooling(kernel_size=2, stride=2)
         out = pool.forward(x)
         pool.backward(dout)
