@@ -86,7 +86,7 @@ class Conv2D:
                                 for j in range(0, self.kernel_size):
                                     out[n][filt_idx][r][c] =  out[n][filt_idx][r][c] + x[n][ch][r_real + i][c_real + j]*self.weight[filt_idx][ch][i][j]
 
-        # add bias term. all over.
+        # add bias term where necessary.
         for n in range(0, x.shape[0]):
             for filt_idx in range(0, self.out_channels):
                 for r in range(0, r_range):
