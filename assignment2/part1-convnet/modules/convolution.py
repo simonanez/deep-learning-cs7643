@@ -45,7 +45,53 @@ class Conv2D:
         # Hint: 1) You may use np.pad for padding.                                  #
         #       2) You may implement the convolution with loops                     #
         #############################################################################
+        x = np.pad(x, ((0,0),(0,0),(self.padding, self.padding),(self.padding, self.padding)), 'constant')
+        # compute iterations horizontal
+        numElements = x.shape[3]
+        remainder = 1000
+        c_range = 0
+        while (remainder > 0):
+            remainder = numElements - self.kernel_size
+            numElements = numElements - self.stride
+            c_range = c_range + 1
+        if x.shape[3] - self.kernel_size < 0:
+            c_range = 0
 
+        # compute iterations vertical
+        remainder = 1000
+        numElements = x.shape[2]
+        r_range = 0
+        while (remainder > 0):
+            remainder = numElements - self.kernel_size
+            numElements = numElements - self.stride
+            r_range = r_range + 1
+        if x.shape[2] - self.kernel_size < 0:
+            r_range = 0
+
+        # output size.
+        out = np.zeros((x.shape[0], self.out_channels, r_range, c_range))
+
+        # iterate over number of images
+        for n in range(0, x.shape[0]):
+            # iterate over number of channels
+            for ch in range(0, x.shape[1]):
+                # iterate over rows and cols, stride as necessary.
+                for r in range(0, r_range):
+                    r_real = int(r * self.stride)
+                    for c in range(0, c_range):
+                        c_real = int(c * self.stride)
+                        # for this certain row and col, perform convolution across all channels.
+                        for filt_idx in range(0,self.out_channels):
+                            for i in range(0, self.kernel_size):
+                                for j in range(0, self.kernel_size):
+                                    out[n][filt_idx][r][c] =  out[n][filt_idx][r][c] + x[n][ch][r_real + i][c_real + j]*self.weight[filt_idx][ch][i][j]
+
+        # add bias term. all over.
+        for n in range(0, x.shape[0]):
+            for filt_idx in range(0, self.out_channels):
+                for r in range(0, r_range):
+                    for c in range(0,c_range):
+                        out[n][filt_idx][r][c] = out[n][filt_idx][r][c] + self.bias[filt_idx]
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
