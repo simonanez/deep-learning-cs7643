@@ -127,30 +127,28 @@ class Conv2D:
                         db[ch] = db[ch] + dout[n][ch][i][j]
 
 
-        #compute dLdk #dw = (2,3,3,3) ... w = [Cout, Cin, Hk, Wk]
-        #              x  = (4,3,5,5)     X = [N, Cin, Hi, Wi]
-        #            dout = (4,2,5,5)     Y = [N, Cout,Hi, Wi]
+        #compute dLdk
 
-        # compute iterations horizontal
-        numElements = x.shape[3]
+        # compute iterations horizontal [for striding]
+        numElements = x_pad.shape[3]
         remainder = 1000
         c_range = 0
         while (remainder > 0):
             remainder = numElements - self.kernel_size
             numElements = numElements - self.stride
             c_range = c_range + 1
-        if x.shape[3] - self.kernel_size < 0:
+        if x_pad.shape[3] - self.kernel_size < 0:
             c_range = 0
 
-        # compute iterations vertical
+        # compute iterations vertical [for striding]
         remainder = 1000
-        numElements = x.shape[2]
+        numElements = x_pad.shape[2]
         r_range = 0
         while (remainder > 0):
             remainder = numElements - self.kernel_size
             numElements = numElements - self.stride
             r_range = r_range + 1
-        if x.shape[2] - self.kernel_size < 0:
+        if x_pad.shape[2] - self.kernel_size < 0:
             r_range = 0
 
         dk = np.zeros((self.weight.shape))
@@ -163,10 +161,12 @@ class Conv2D:
                     # for a selected (a', b') weight.
                     for a in range(0, self.weight.shape[2]):
                         for b in range(0, self.weight.shape[3]):
-                            # compute gradient by summing over x's.
-                            for r in range(0, x.shape[2]):
-                                for c in range(0, x.shape[3]):
-                                    dk[filt_idx][ch][a][b] = dk[filt_idx][ch][a][b] + dout[n][filt_idx][r][c] * x_pad[n][ch][r+a][c+b]
+                            # compute gradient by summing over x's. stride if necessary.
+                            for r in range(0, r_range):
+                                r_real = int(r * self.stride)
+                                for c in range(0, c_range):
+                                    c_real = int(c * self.stride)
+                                    dk[filt_idx][ch][a][b] = dk[filt_idx][ch][a][b] + dout[n][filt_idx][r][c] * x_pad[n][ch][r_real+a][c_real+b]
 
 
 
@@ -181,13 +181,16 @@ class Conv2D:
             for ch in range(0, self.in_channels):
                 #for each row and column within the image channel.
                 for r in range(0, x_pad.shape[2]):
+                    r_real = int(r)
                     for c in range(0, x_pad.shape[3]):
+                        c_real = int(c)
                         #for each weight in image.
                         for a in range(0,self.weight.shape[2]):
                             for b in range(0, self.weight.shape[3]):
                                 for filt_idx in range(0, self.out_channels):
-                                    if r - a >= 0 and c - b >= 0 and r - a < dout.shape[2] and c - b < dout.shape[3]:
-                                        dx_pad[n][ch][r][c] = dx_pad[n][ch][r][c] + dout[n][filt_idx][r - a][c - b] * self.weight[filt_idx][ch][a][b]
+                                    if (r_real - a*self.stride >= 0) and (c_real - b*self.stride >= 0) and (r_real - a*self.stride < dout.shape[2]) and (c_real - b*self.stride < dout.shape[3]):
+                                        dx_pad[n][ch][r][c] = dx_pad[n][ch][r][c] + dout[n][filt_idx][r - a*self.stride][c - b*self.stride] * self.weight[filt_idx][ch][a][b]
+
 
         slices = []
         pad_width = ((0,0),(0,0),(self.padding, self.padding),(self.padding, self.padding))
