@@ -33,6 +33,13 @@ class Linear:
         #############################################################################
         # TODO: Implement the forward pass.                                         #
         #    HINT: You may want to flatten the input first                          #
+        # problem seems to be here, careful!
+        # for trainer, x = (10,32,16,16)
+        # xx is 10, 8192.
+        # out is 10x10
+        # what do i reshape to?
+
+        # W = out_dim by in_dim.
         #############################################################################
         # initialize container to store x.
         xx = np.empty((x.shape[0],self.in_dim))

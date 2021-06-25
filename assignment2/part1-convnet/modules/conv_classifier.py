@@ -72,9 +72,12 @@ class ConvNet:
         #    1) Implement backward pass of the model                                #
         #############################################################################
         self.criterion.backward()
+
         dout = self.criterion.dx
-        for module in self.modules:
-            dout = module.backward(dout)
+
+        for idx in reversed(range(0,len(self.modules))):
+            self.modules[idx].backward(dout)
+            dout = self.modules[idx].dx #store gradient to send to previous layer.
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
