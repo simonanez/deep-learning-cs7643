@@ -13,7 +13,7 @@ class TwoLayerNet(nn.Module):
         # TODO: Initialize the TwoLayerNet, use sigmoid activation between layers   #
         #############################################################################
         self.fc1 = nn.Linear(input_dim, hidden_size)
-        self.activation = nn.Sigmoid();
+        self.activation = nn.Sigmoid()
         self.fc2 = nn.Linear(hidden_size, num_classes)
 
 
@@ -30,7 +30,7 @@ class TwoLayerNet(nn.Module):
 
 
         #pass data thru fully connected network 1:
-        out = self.fc1(flat_x);
+        out = self.fc1(flat_x)
 
         #pass data thru sigmoid:
         out = self.activation(out)
