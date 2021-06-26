@@ -55,7 +55,7 @@ def train(epoch, data_loader, model, optimizer, criterion):
     iter_time = AverageMeter()
     losses = AverageMeter()
     acc = AverageMeter()
-
+    model.train() #turn on training mode.
     for idx, (data, target) in enumerate(data_loader):
         start = time.time()
 
@@ -101,6 +101,7 @@ def validate(epoch, val_loader, model, criterion):
     num_class = 10
     cm =torch.zeros(num_class, num_class)
     # evaluation loop
+    model.eval() #turn on evaluation mode.
     for idx, (data, target) in enumerate(val_loader):
         start = time.time()
 
