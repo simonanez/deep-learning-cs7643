@@ -171,7 +171,7 @@ def main():
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
 
     # Normalize the test set same as training set without augmentation
@@ -201,33 +201,13 @@ def main():
         root='./data', train=False, download=True, transform=transform_test)
     test_loader = torch.utils.data.DataLoader(
         test_dataset, batch_size=100, shuffle=False, num_workers=2)
-    conv1_output_dim = 30
-    conv3_output_dim = 24
-    conv6_output_dim = 10
-    conv8_output_dim = 3
-    convkernel_stride = 1
-    convInput_padding = 1
-    convkernel_dim = 3
-
-    resconv2d_1 = nn.Conv2d(conv1_output_dim, conv3_output_dim, convkernel_dim,
-                                     stride=convkernel_stride,
-                                     padding = convInput_padding)
-    resconv2d_2 = nn.Conv2d(conv3_output_dim, conv6_output_dim, convkernel_dim,
-                                     stride=convkernel_stride,
-                                     padding=convInput_padding)
-    resconv2d_3 = nn.Conv2d(conv6_output_dim, conv8_output_dim, convkernel_dim,
-                            stride=convkernel_stride,
-                            padding=convInput_padding)
-    resbatch2d_1 = nn.BatchNorm2d(conv3_output_dim)
-    resbatch2d_2 = nn.BatchNorm2d(conv6_output_dim)
-    resbatch2d_3 = nn.BatchNorm2d(conv8_output_dim)
 
     if args.model == 'TwoLayerNet':
         model = TwoLayerNet(3072, 256, 10)
     elif args.model == 'VanillaCNN':
         model = VanillaCNN()
     elif args.model == 'MyModel':
-        model = MyModel(resconv2d_1, resbatch2d_1, resconv2d_2, resbatch2d_2, resconv2d_3, resbatch2d_3)
+        model = MyModel()
     elif args.model == 'ResNet-32':
         model = resnet32()
     print(model)
