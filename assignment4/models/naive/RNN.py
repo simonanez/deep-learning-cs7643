@@ -34,8 +34,8 @@ class VanillaRNN(nn.Module):
 
         self.linear1 = nn.Linear( self.input_size + self.hidden_size, self.hidden_size)
         self.tanh = nn.Tanh()
-        self.linear2 = nn.Linear( self.hidden_size, self.output_size )
-        self.softmax = nn.LogSoftmax(dim=0)
+        self.linear2 = nn.Linear( self.input_size + self.hidden_size, self.output_size )
+        self.softmax = nn.LogSoftmax(dim=1)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -61,10 +61,8 @@ class VanillaRNN(nn.Module):
         hidden = self.linear1(concat)
         hidden = self.tanh(hidden)
 
-        # output = self.linear2(hidden)
-        output = self.softmax(concat)
-        # input2= torch.empty((1,input.shape[0], input.shape[1]))
-        # hidden2= torch.empty((1,hidden.shape[0], hidden.shape[1]))
+        output = self.linear2(concat)
+        output = self.softmax(output)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
