@@ -115,7 +115,7 @@ print('Close to out: ', expected_out.allclose(out, atol=1e-4))
 # print('Close to hidden: ', expected_hidden.allclose(hidden, atol=1e-4))
 
 ################# DECODER #################
-#
+
 # i, n, h =  10, 2, 2
 # decoder = Decoder(h, n, n, i)
 # x_array = np.random.rand(5, 1) * 10

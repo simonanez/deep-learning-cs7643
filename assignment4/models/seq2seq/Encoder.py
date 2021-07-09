@@ -66,7 +66,6 @@ class Encoder(nn.Module):
         #       recurrent layer                                                     #
         #       Apply tanh activation to the hidden tensor before returning it      #
         #############################################################################
-
         # input is (batch size, seq_len)
         # output is (batch size, seq len, embedding dim)
         embedding = self.embedding(input)
@@ -87,5 +86,4 @@ class Encoder(nn.Module):
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
-
         return output, hidden

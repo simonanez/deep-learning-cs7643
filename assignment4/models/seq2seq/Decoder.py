@@ -62,13 +62,20 @@ class Decoder(nn.Module):
         #       Apply linear layer and softmax activation to output tensor before   #
         #       returning it.                                                       #
         #############################################################################
-        if len(input) == 1:
+        input_size = input.size()
+        if len(input) == 1 and len(input_size) < 2:
             input = input.unsqueeze(0)
         embedding = self.embedding(input) # input for decoder is (5,1)
         embedding = self.dropout(embedding)
+
         output, hidden = self.rnn(embedding, hidden)
-        output = self.linear1(output)
         output = torch.squeeze(output)
+
+        if len(output.shape) > 1:
+            output = output[0, :]
+
+        output = self.linear1(output)
+        # output = torch.squeeze(output)
         output = self.softmax(output)
         #############################################################################
         #                              END OF YOUR CODE                             #
