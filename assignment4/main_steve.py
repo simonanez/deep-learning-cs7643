@@ -10,6 +10,8 @@ import numpy as np
 import csv
 
 from models.naive.RNN import VanillaRNN
+from models.naive.LSTM import LSTM
+from utils import train, evaluate, set_seed_nb, unit_test_values
 
 def unit_test_values(testcase):
     if testcase == 'rnn':
@@ -71,19 +73,26 @@ def unit_test_values(testcase):
                                             -2.3045]]])
         return expected_out
 
+set_seed_nb()
+expected_ht, expected_ct = unit_test_values('lstm')
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(device)
-x1,x2 = (1,4), (-1,2)
-h1,h2 = (-1,2,0,4), (0,1,3,-1)
+
+x1,x2 = np.mgrid[-1:3:3j, -1:4:2j]
+h1,h2 = np.mgrid[-2:2:3j, 1:3:4j]
 batch = 4
 x = torch.FloatTensor(np.linspace(x1,x2,batch))
 h = torch.FloatTensor(np.linspace(h1,h2,batch))
-rnn = VanillaRNN(x.shape[-1], h.shape[-1], 3)
-out , hidden = rnn.forward(x, h)
-expected_out, expected_hidden = unit_test_values('rnn')
-# print('expected out: ', expected_out)
-# print('out: ',out)
-print('hidden: ', hidden)
-print('expected hidden: ', expected_hidden)
+lstm = LSTM(x.shape[-1], h.shape[-1])
 
+h_t, c_t = lstm.forward(x)
+
+print('ht: ', h_t)
+print('expected_ht: ', expected_ht)
+print('ct: ', c_t)
+print('expected_ct: ', expected_ct)
+
+if h_t is not None:
+    print('Close to h_t: ', expected_ht.allclose(h_t, atol=1e-4))
+    print('Close to c_t; ', expected_ct.allclose(c_t, atol=1e-4))
+else:
+    print("NOT IMPLEMENTED")
