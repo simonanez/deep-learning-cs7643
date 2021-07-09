@@ -11,6 +11,10 @@ import csv
 
 from models.naive.RNN import VanillaRNN
 from models.naive.LSTM import LSTM
+from models.seq2seq.Encoder import Encoder
+from models.seq2seq.Decoder import Decoder
+
+
 from utils import train, evaluate, set_seed_nb, unit_test_values
 
 def unit_test_values(testcase):
@@ -74,25 +78,30 @@ def unit_test_values(testcase):
         return expected_out
 
 set_seed_nb()
-expected_ht, expected_ct = unit_test_values('lstm')
+################# ENCODER #################
+# expected_out, expected_hidden = unit_test_values('encoder')
+#
+# i, n, h = 10, 4, 2
+#
+# encoder = Encoder(i, n, h, h)
+# x_array = np.random.rand(5,1) * 10
+# x = torch.LongTensor(x_array)
+# out, hidden = encoder.forward(x)
+#
+#
+# print('Close to out: ', expected_out.allclose(out, atol=1e-4))
+# print('Close to hidden: ', expected_hidden.allclose(hidden, atol=1e-4))
 
+################# DECODER #################
 
-x1,x2 = np.mgrid[-1:3:3j, -1:4:2j]
-h1,h2 = np.mgrid[-2:2:3j, 1:3:4j]
-batch = 4
-x = torch.FloatTensor(np.linspace(x1,x2,batch))
-h = torch.FloatTensor(np.linspace(h1,h2,batch))
-lstm = LSTM(x.shape[-1], h.shape[-1])
+i, n, h =  10, 2, 2
+decoder = Decoder(h, n, n, i)
+x_array = np.random.rand(5, 1) * 10
+x = torch.LongTensor(x_array)
+_, enc_hidden = unit_test_values('encoder')
+out, hidden = decoder.forward(x,enc_hidden)
 
-h_t, c_t = lstm.forward(x)
+expected_out, expected_hidden = unit_test_values('decoder')
 
-print('ht: ', h_t)
-print('expected_ht: ', expected_ht)
-print('ct: ', c_t)
-print('expected_ct: ', expected_ct)
-
-if h_t is not None:
-    print('Close to h_t: ', expected_ht.allclose(h_t, atol=1e-4))
-    print('Close to c_t; ', expected_ct.allclose(c_t, atol=1e-4))
-else:
-    print("NOT IMPLEMENTED")
+print('Close to out: ', expected_out.allclose(out, atol=1e-4))
+print('Close to hidden: ', expected_hidden.allclose(hidden, atol=1e-4))

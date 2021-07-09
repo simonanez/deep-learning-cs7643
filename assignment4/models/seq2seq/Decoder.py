@@ -29,6 +29,14 @@ class Decoder(nn.Module):
         #                                                                           #
         # NOTE: Use nn.RNN and nn.LSTM instead of the naive implementation          #
         #############################################################################
+        self.embedding = nn.Embedding(self.output_size,self.emb_size)
+        if self.model_type == "RNN":
+            self.rnn = nn.RNN(self.emb_size, self.decoder_hidden_size, batch_first=True)
+        else:
+            self.rnn = nn.LSTM(self.emb_size, self.decoder_hidden_size, batch_first=True)
+        self.linear1 = nn.Linear(self.encoder_hidden_size, self.output_size)
+        self.softmax = nn.LogSoftmax(dim=1)
+        self.dropout = nn.Dropout(dropout)
 
 
         
@@ -54,9 +62,12 @@ class Decoder(nn.Module):
         #       Apply linear layer and softmax activation to output tensor before   #
         #       returning it.                                                       #
         #############################################################################
-     
-        output, hidden = None, None
-     
+        embedding = self.embedding(input)
+        embedding = self.dropout(embedding)
+        output, hidden = self.rnn(embedding, hidden)
+        output = self.linear1(output)
+        output = torch.squeeze(output)
+        output = self.softmax(output)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
