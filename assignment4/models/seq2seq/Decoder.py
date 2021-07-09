@@ -63,20 +63,33 @@ class Decoder(nn.Module):
         #       returning it.                                                       #
         #############################################################################
         input_size = input.size()
-        if len(input) == 1 and len(input_size) < 2:
-            input = input.unsqueeze(0)
+        input_shape = input.shape
+        worst_enemy = torch.zeros(1,2)
+        if len(input_shape) == 1 and len(input_size) < 2:
+            input = input.unsqueeze(1)
+
+        # input is torch.size([128])
+        # after unsqueeze is : torch.size([1, 128])
+
         embedding = self.embedding(input) # input for decoder is (5,1)
         embedding = self.dropout(embedding)
 
+        # embedding = (128, 1, 32)
         output, hidden = self.rnn(embedding, hidden)
+
+        #output.size = # 128, 1, 64
         output = torch.squeeze(output)
 
-        if len(input) == 1 and len(input_size) > 1:
+        #output size = (128,64)
+        if input.shape[-1] > 1:
             output = output[0, :]
 
+        #output size = (128,64)
         output = self.linear1(output)
         # output = torch.squeeze(output)
         output = self.softmax(output)
+
+        #output size = 5893.
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
