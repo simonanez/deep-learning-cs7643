@@ -32,6 +32,10 @@ class VanillaRNN(nn.Module):
         #    Initialize the hidden layer before the output layer!                   #
         #############################################################################
 
+        self.linear1 = nn.Linear( self.input_size + self.hidden_size, self.hidden_size)
+        self.tanh = nn.Tanh()
+        self.linear2 = nn.Linear( self.hidden_size, self.output_size )
+        self.softmax = nn.LogSoftmax(dim=0)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -47,14 +51,20 @@ class VanillaRNN(nn.Module):
                 hidden (tensor): the hidden value of current time step of shape (batch_size, hidden_size)
         """
 
-        output = None
 
         #############################################################################
         # TODO:                                                                     #
         #   Implement the forward pass for the Vanilla RNN. Note that we are only   #
         #   going over one time step. Please refer to the structure in the notebook.#                                              #
         #############################################################################
-        
+        concat = torch.cat((input,hidden), 1 )
+        hidden = self.linear1(concat)
+        hidden = self.tanh(hidden)
+
+        # output = self.linear2(hidden)
+        output = self.softmax(concat)
+        # input2= torch.empty((1,input.shape[0], input.shape[1]))
+        # hidden2= torch.empty((1,hidden.shape[0], hidden.shape[1]))
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################

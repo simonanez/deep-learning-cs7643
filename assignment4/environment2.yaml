@@ -1,0 +1,12 @@
+name: cs7643-a2-gpu
+channels:
+  - defaults
+  - pytorch
+dependencies:
+  - python
+  - numpy
+  - matplotlib
+  - pytorch=1.7.1
+  - torchtext=0.8.1
+  - spacy=2.3.5
+  - tqdm
