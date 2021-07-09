@@ -13,6 +13,7 @@ from models.naive.RNN import VanillaRNN
 from models.naive.LSTM import LSTM
 from models.seq2seq.Encoder import Encoder
 from models.seq2seq.Decoder import Decoder
+from models.seq2seq.Seq2Seq import Seq2Seq
 
 
 from utils import train, evaluate, set_seed_nb, unit_test_values
@@ -78,6 +79,27 @@ def unit_test_values(testcase):
         return expected_out
 
 set_seed_nb()
+embedding_size = 32
+hidden_size = 32
+input_size = 8
+output_size = 8
+batch, seq = 1, 2
+expected_out = unit_test_values('seq2seq') # (1, 1, 2, 8)
+
+encoder = Encoder(input_size, embedding_size, hidden_size, hidden_size)
+decoder = Decoder(embedding_size, hidden_size, hidden_size, output_size)
+
+seq2seq = Seq2Seq(encoder, decoder, 'cpu')
+x_array = np.random.rand(batch, seq) * 10
+x = torch.LongTensor(x_array)
+out = seq2seq.forward(x)
+
+print('Close to out: ', expected_out.allclose(out, atol=1e-4))
+
+
+
+
+
 ################# ENCODER #################
 # expected_out, expected_hidden = unit_test_values('encoder')
 #
@@ -93,15 +115,15 @@ set_seed_nb()
 # print('Close to hidden: ', expected_hidden.allclose(hidden, atol=1e-4))
 
 ################# DECODER #################
-
-i, n, h =  10, 2, 2
-decoder = Decoder(h, n, n, i)
-x_array = np.random.rand(5, 1) * 10
-x = torch.LongTensor(x_array)
-_, enc_hidden = unit_test_values('encoder')
-out, hidden = decoder.forward(x,enc_hidden)
-
-expected_out, expected_hidden = unit_test_values('decoder')
-
-print('Close to out: ', expected_out.allclose(out, atol=1e-4))
-print('Close to hidden: ', expected_hidden.allclose(hidden, atol=1e-4))
+#
+# i, n, h =  10, 2, 2
+# decoder = Decoder(h, n, n, i)
+# x_array = np.random.rand(5, 1) * 10
+# x = torch.LongTensor(x_array)
+# _, enc_hidden = unit_test_values('encoder')
+# out, hidden = decoder.forward(x,enc_hidden)
+#
+# expected_out, expected_hidden = unit_test_values('decoder')
+#
+# print('Close to out: ', expected_out.allclose(out, atol=1e-4))
+# print('Close to hidden: ', expected_hidden.allclose(hidden, atol=1e-4))

@@ -22,6 +22,10 @@ class Seq2Seq(nn.Module):
         #    that the models are on the same device (CPU/GPU). This should take no  #
         #    more than 2 lines of code.                                             #
         #############################################################################
+        self.encoder = encoder
+        self.decoder = decoder
+        self.encoder.to(self.device)
+        self.decoder.to(self.device)
 
 
         #############################################################################
@@ -35,6 +39,7 @@ class Seq2Seq(nn.Module):
                 source (tensor): sequences in source language of shape (batch_size, seq_len)
                 out_seq_len (int): the maximum length of the output sequence. If None, the length is determined by the input sequences.
         """
+        # source seems to be a (1,1,2)
 
         batch_size = source.shape[0]
         seq_len = source.shape[1]
@@ -58,9 +63,18 @@ class Seq2Seq(nn.Module):
         #          will have to be manipulated before being fed in as the decoder   #
         #          input at the next time step.                                     #
         #############################################################################
-
-        outputs=None
-
+        output, hidden = self.encoder(source)
+        outputs = torch.zeros(out_seq_len, self.decoder.output_size)
+        # initialize.
+        output, hidden = self.decoder(source[:, 0], hidden)
+        outputs[0] = output
+        output_idx = torch.argmax(outputs[0])
+        output_idx = output_idx.unsqueeze(0)
+        for i in range(1, out_seq_len):
+            output, hidden = self.decoder(output_idx , hidden)
+            outputs[i] = output
+            output_idx = torch.argmax(outputs[i])
+            output_idx = output_idx.unsqueeze(0)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
