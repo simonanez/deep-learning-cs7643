@@ -8,7 +8,23 @@ import torch.optim  as optim
 import torch.nn as nn
 import numpy as np
 import csv
+import math
+import time
 
+# Pytorch package
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+# Torchtest package
+from torchtext.datasets import Multi30k
+from torchtext.data import Field, BucketIterator
+
+# Tqdm progress bar
+from tqdm import tqdm_notebook, tqdm
+
+# Code provide to you for training and evaluation
+from utils import train, evaluate, set_seed_nb, unit_test_values
 from models.naive.RNN import VanillaRNN
 from models.naive.LSTM import LSTM
 from models.seq2seq.Encoder import Encoder
@@ -78,52 +94,153 @@ def unit_test_values(testcase):
                                             -2.3045]]])
         return expected_out
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 set_seed_nb()
-embedding_size = 32
-hidden_size = 32
-input_size = 8
-output_size = 8
-batch, seq = 1, 2
-expected_out = unit_test_values('seq2seq') # (1, 1, 2, 8)
+# Define the source and target language
+# MAX_LEN = 20
+# SRC = Field(tokenize = "spacy",
+#             tokenizer_language="de",
+#             init_token = '<sos>',
+#             eos_token = '<eos>',
+#             fix_length = MAX_LEN,
+#             lower = True)
+#
+# TRG = Field(tokenize = "spacy",
+#             tokenizer_language="en",
+#             init_token = '<sos>',
+#             eos_token = '<eos>',
+#             fix_length = MAX_LEN,
+#             lower = True)
+#
+# # Download and split the data. It should take some time
+# train_data, valid_data, test_data = Multi30k.splits(exts = ('.de', '.en'),
+#                                                     fields = (SRC, TRG))
+# # Define Batchsize
+# BATCH_SIZE = 128
+#
+# # Build the vocabulary associated with each language
+# SRC.build_vocab(train_data, min_freq = 2)
+# TRG.build_vocab(train_data, min_freq = 2)
+#
+# # Get the padding index to be ignored later in loss calculation
+# PAD_IDX = TRG.vocab.stoi['<pad>']
+#
+# # Get data-loaders using BucketIterator
+# train_loader, valid_loader, test_loader = BucketIterator.splits(
+#     (train_data, valid_data, test_data),
+#     batch_size = BATCH_SIZE, device = device)
+#
+# # Get the input and the output sizes for model
+# input_size = len(SRC.vocab)
+# output_size = len(TRG.vocab)
+#
+#
+# # Hyperparameters. You are welcome to modify these
+# encoder_emb_size = 32
+# encoder_hidden_size = 64
+# encoder_dropout = 0.2
+#
+# decoder_emb_size = 32
+# decoder_hidden_size = 64
+# decoder_dropout = 0.2
+#
+# learning_rate = 1e-3
+# model_type = "RNN"
+#
+# EPOCHS = 10
+#
+# #input size and output size
+# input_size = len(SRC.vocab)
+# output_size = len(TRG.vocab)
+#
+#
+# # Declare models, optimizer, and loss function
+# encoder = Encoder(input_size, encoder_emb_size, encoder_hidden_size, decoder_hidden_size, dropout = encoder_dropout, model_type = model_type)
+# decoder = Decoder(decoder_emb_size, encoder_hidden_size, encoder_hidden_size, output_size, dropout = decoder_dropout, model_type = model_type)
+# seq2seq_model = Seq2Seq(encoder, decoder, device)
+# optimizer = optim.Adam(seq2seq_model.parameters(), lr = learning_rate)
+# scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+# criterion = nn.CrossEntropyLoss(ignore_index=PAD_IDX)
+#
+# for epoch_idx in range(EPOCHS):
+#     print("-----------------------------------")
+#     print("Epoch %d" % (epoch_idx + 1))
+#     print("-----------------------------------")
+#
+#     train_loss, avg_train_loss = train(seq2seq_model, train_loader, optimizer, criterion)
+#     scheduler.step(train_loss)
+#
+#     val_loss, avg_val_loss = evaluate(seq2seq_model, valid_loader, criterion)
+#
+#     avg_train_loss = avg_train_loss.item()
+#     avg_val_loss = avg_val_loss.item()
+#     print("Training Loss: %.4f. Validation Loss: %.4f. " % (avg_train_loss, avg_val_loss))
+#     print("Training Perplexity: %.4f. Validation Perplexity: %.4f. " % (np.exp(avg_train_loss), np.exp(avg_val_loss)))
 
-encoder = Encoder(input_size, embedding_size, hidden_size, hidden_size)
-decoder = Decoder(embedding_size, hidden_size, hidden_size, output_size)
 
-seq2seq = Seq2Seq(encoder, decoder, 'cpu')
-x_array = np.random.rand(batch, seq) * 10
-x = torch.LongTensor(x_array)
-out = seq2seq.forward(x)
 
-print('Close to out: ', expected_out.allclose(out, atol=1e-4))
 
+
+
+
+
+
+
+
+
+
+
+encoderON = False
+decoderON = False
+seq2seqON = True
+
+if seq2seqON==True:
+    embedding_size = 32
+    hidden_size = 32
+    input_size = 8
+    output_size = 8
+    batch, seq = 1, 2
+    expected_out = unit_test_values('seq2seq') # (1, 1, 2, 8)
+
+    encoder = Encoder(input_size, embedding_size, hidden_size, hidden_size)
+    decoder = Decoder(embedding_size, hidden_size, hidden_size, output_size)
+
+    seq2seq = Seq2Seq(encoder, decoder, 'cpu')
+    x_array = np.random.rand(batch, seq) * 10
+    x = torch.LongTensor(x_array)
+    out = seq2seq.forward(x)
+
+    print('Close to out: ', expected_out.allclose(out, atol=1e-4))
 
 
 
 
 ################# ENCODER #################
-# expected_out, expected_hidden = unit_test_values('encoder')
-#
-# i, n, h = 10, 4, 2
-#
-# encoder = Encoder(i, n, h, h)
-# x_array = np.random.rand(5,1) * 10
-# x = torch.LongTensor(x_array)
-# out, hidden = encoder.forward(x)
-#
-#
-# print('Close to out: ', expected_out.allclose(out, atol=1e-4))
-# print('Close to hidden: ', expected_hidden.allclose(hidden, atol=1e-4))
+if encoderON==True:
+    expected_out, expected_hidden = unit_test_values('encoder')
 
-################# DECODER #################
+    i, n, h = 10, 4, 2
 
-# i, n, h =  10, 2, 2
-# decoder = Decoder(h, n, n, i)
-# x_array = np.random.rand(5, 1) * 10
-# x = torch.LongTensor(x_array)
-# _, enc_hidden = unit_test_values('encoder')
-# out, hidden = decoder.forward(x,enc_hidden)
-#
-# expected_out, expected_hidden = unit_test_values('decoder')
-#
-# print('Close to out: ', expected_out.allclose(out, atol=1e-4))
-# print('Close to hidden: ', expected_hidden.allclose(hidden, atol=1e-4))
+    encoder = Encoder(i, n, h, h)
+    x_array = np.random.rand(5,1) * 10
+    x = torch.LongTensor(x_array)
+    out, hidden = encoder.forward(x)
+
+
+    print('Close to out: ', expected_out.allclose(out, atol=1e-4))
+    print('Close to hidden: ', expected_hidden.allclose(hidden, atol=1e-4))
+
+################ DECODER #################
+if decoderON==True:
+    i, n, h =  10, 2, 2
+    decoder = Decoder(h, n, n, i)
+    x_array = np.random.rand(5, 1) * 10
+    x = torch.LongTensor(x_array)
+    _, enc_hidden = unit_test_values('encoder')
+    out, hidden = decoder.forward(x,enc_hidden)
+
+    expected_out, expected_hidden = unit_test_values('decoder')
+
+    print('Close to out: ', expected_out.allclose(out, atol=1e-4))
+    print('Close to hidden: ', expected_hidden.allclose(hidden, atol=1e-4))

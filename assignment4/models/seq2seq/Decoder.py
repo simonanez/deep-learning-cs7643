@@ -71,7 +71,7 @@ class Decoder(nn.Module):
         output, hidden = self.rnn(embedding, hidden)
         output = torch.squeeze(output)
 
-        if len(output.shape) > 1:
+        if len(input) == 1 and len(input_size) > 1:
             output = output[0, :]
 
         output = self.linear1(output)
