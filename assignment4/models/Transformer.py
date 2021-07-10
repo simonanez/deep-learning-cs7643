@@ -87,7 +87,11 @@ class TransformerTranslator(nn.Module):
         # Deliverable 3: Initialize what you need for the feed-forward layer.        # 
         # Don't forget the layer normalization.                                      #
         ##############################################################################
-        
+        self.linearff1 = nn.Linear(self.hidden_dim,self.dim_feedforward)
+        self.activationff = nn.ReLU()
+        self.linearff2 = nn.Linear(self.dim_feedforward, self.hidden_dim)
+        self.norm_ff = nn.LayerNorm(self.hidden_dim)
+
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -97,7 +101,7 @@ class TransformerTranslator(nn.Module):
         # TODO:
         # Deliverable 4: Initialize what you need for the final layer (1-2 lines).   #
         ##############################################################################
-        
+        self.linear_final =nn.Linear(self.hidden_dim,self.output_size)
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -119,8 +123,11 @@ class TransformerTranslator(nn.Module):
         # You will need to use all of the methods you have previously defined above.#
         # You should only be calling ClassificationTransformer class methods here.  #
         #############################################################################
-        outputs = None
-        
+        outputs = self.embed(inputs)
+        outputs = self.multi_head_attention(outputs)
+        outputs = self.feedforward_layer(outputs)
+        outputs = self.final_layer(outputs)
+
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -220,8 +227,11 @@ class TransformerTranslator(nn.Module):
         # initialized them.                                                         #
         # This should not take more than 3-5 lines of code.                         #
         #############################################################################
-        outputs = None
-        
+        outputs = self.linearff1(inputs)
+        outputs = self.activationff(outputs)
+        outputs = self.linearff2(outputs)
+        outputs = self.norm_mh(outputs + inputs)
+
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -239,8 +249,8 @@ class TransformerTranslator(nn.Module):
         # Deliverable 4: Implement the final layer for the Transformer Translator.  #
         # This should only take about 1 line of code.                               #
         #############################################################################
-        outputs = None
-                
+        # d4 = torch.Size([2, 43, 2])
+        outputs = self.linear_final(inputs)
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################

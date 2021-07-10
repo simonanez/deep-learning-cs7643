@@ -186,10 +186,25 @@ embeds = model.embed(inputs)
 # attention
 hidden_states = model.multi_head_attention(embeds)
 
+## feed forward
+outputs = model.feedforward_layer(hidden_states)
+
+# final layer.
+scores = model.final_layer(outputs)
+
+inputs = train_inxs[0:2]
+inputs = torch.LongTensor(inputs)
+
+outputs = model.forward(inputs)
+
 try:
-    print("Difference:", torch.sum(torch.pairwise_distance(hidden_states, d2)).item()) # should be very small (<0.01)
+    print("Difference:", torch.sum(torch.pairwise_distance(outputs, scores)).item()) # should be very small (<3e-5)
 except:
     print("NOT IMPLEMENTED")
+
+
+
+
 
 ######################################### SEQUENCER TRAINING ##################################################################
 # # Define the source and target language
