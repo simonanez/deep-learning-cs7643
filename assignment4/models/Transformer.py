@@ -32,14 +32,14 @@ class TransformerTranslator(nn.Module):
         super(TransformerTranslator, self).__init__()
         assert hidden_dim % num_heads == 0
         
-        self.num_heads = num_heads
-        self.word_embedding_dim = hidden_dim
+        self.num_heads = num_heads #heads
+        self.word_embedding_dim = hidden_dim # embed_size word.
         self.hidden_dim = hidden_dim
         self.dim_feedforward = dim_feedforward
-        self.max_length = max_length
-        self.input_size = input_size
+        self.max_length = max_length #positional embedding.
+        self.input_size = input_size #src vocab size.
         self.output_size = output_size
-        self.device = device
+        self.device = device #device
         self.dim_k = dim_k
         self.dim_v = dim_v
         self.dim_q = dim_q
@@ -54,7 +54,9 @@ class TransformerTranslator(nn.Module):
         # Initialize the word embeddings before the positional encodings.            #
         # Don’t worry about sine/cosine encodings- use positional encodings.         #
         ##############################################################################
-        
+        self.word_embedding = nn.Embedding(self.input_size, self.word_embedding_dim)
+        self.position_encoding = nn.Embedding(self.max_length, self.word_embedding_dim)
+
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -130,14 +132,16 @@ class TransformerTranslator(nn.Module):
         :param inputs: intTensor of shape (N,T)
         :returns embeddings: floatTensor of shape (N,T,H)
         """
-        embeddings = None
         #############################################################################
         # TODO:
         # Deliverable 1: Implement the embedding lookup.                            #
         # Note: word_to_ix has keys from 0 to self.vocab_size - 1                   #
         # This will take a few lines.                                               #
         #############################################################################
-      
+        x1 = self.word_embedding(inputs)
+        positions = torch.arange(0,inputs.shape[1]).expand(inputs.shape[0], inputs.shape[1])
+        x2 = self.position_encoding(positions)
+        embeddings = x1 + x2
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -158,8 +162,45 @@ class TransformerTranslator(nn.Module):
         # Deliverable 2: Implement multi-head self-attention followed by add + norm.#
         # Use the provided 'Deliverable 2' layers initialized in the constructor.   #
         #############################################################################
-        outputs = None
-        
+        # # Head #1
+        # self.k1 = nn.Linear(self.hidden_dim, self.dim_k)
+        # self.v1 = nn.Linear(self.hidden_dim, self.dim_v)
+        # self.q1 = nn.Linear(self.hidden_dim, self.dim_q)
+        #
+        # # Head #2
+        # self.k2 = nn.Linear(self.hidden_dim, self.dim_k)
+        # self.v2 = nn.Linear(self.hidden_dim, self.dim_v)
+        # self.q2 = nn.Linear(self.hidden_dim, self.dim_q)
+        #
+        # self.softmax = nn.Softmax(dim=2)
+        # self.attention_head_projection = nn.Linear(self.dim_v * self.num_heads, self.hidden_dim)
+        # self.norm_mh = nn.LayerNorm(self.hidden_dim)
+
+        #inputs.size() = torch.Size([2, 43, 128])
+        #d2.size() = torch.Size([2, 43, 128])
+
+        keys1    = self.k1(inputs)
+        values1  = self.v1(inputs)
+        queries1 = self.q1(inputs)
+        keys2    = self.k2(inputs)
+        values2  = self.v2(inputs)
+        queries2 = self.q2(inputs)
+
+        keys1 = torch.transpose(keys1, 1,2)
+        attention1 = torch.matmul(queries1, keys1)
+        attention1 = self.softmax( attention1 / (self.dim_k ** (1/2)))
+        attention1 = torch.matmul(attention1, values1)
+
+        keys2 = torch.transpose(keys2, 1, 2)
+        attention2 = torch.matmul(queries2, keys2)
+        attention2 = self.softmax(attention2 / (self.dim_k ** (1 / 2)))
+        attention2 = torch.matmul(attention2, values2)
+
+        attention_concat= torch.cat((attention1, attention2), dim=2)
+        attention_concat = self.attention_head_projection(attention_concat)
+
+        outputs = self.norm_mh(attention_concat + inputs)
+
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
