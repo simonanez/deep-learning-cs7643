@@ -64,7 +64,7 @@ class Seq2Seq(nn.Module):
         #          input at the next time step.                                     #
         #############################################################################
         output, hidden = self.encoder(source)
-        outputs = torch.zeros(batch_size, out_seq_len, self.decoder.output_size)
+        outputs = torch.zeros(batch_size, out_seq_len, self.decoder.output_size, device=self.device)
         # initialize -- batch size = 128, seq_len = 20.
         output, hidden = self.decoder(source[:, 0], hidden)
         # output of shape -- batch size,
@@ -81,7 +81,7 @@ class Seq2Seq(nn.Module):
         for i in range(1, out_seq_len):
             output, hidden = self.decoder(output_idx , hidden)
             outputs[:,i,:] = output
-            output_idx = outputs[:,0,:].argmax(1)
+            output_idx = outputs[:,i,:].argmax(1)
             output_idx = output_idx.unsqueeze(1)
         #############################################################################
         #                              END OF YOUR CODE                             #

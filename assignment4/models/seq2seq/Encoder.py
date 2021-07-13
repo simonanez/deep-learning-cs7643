@@ -72,8 +72,10 @@ class Encoder(nn.Module):
         # dropout certain signals. still output is (batch_size, seq len , embedding dim)
         embedding = self.dropout(embedding)
         # batch size dim is first.
-        output, hidden = self.rnn(embedding)
-
+        if self.model_type == "RNN":
+            output,hidden= self.rnn(embedding)
+        else:
+            output, (hidden, cell) = self.rnn(embedding)
         # pass in hidden thru linear layers.
         hidden = self.linear1(hidden)
         hidden = self.activation(hidden)
@@ -81,8 +83,9 @@ class Encoder(nn.Module):
         # apply final tanh activation
         hidden = self.activation_final(hidden)
 
-        # hidden state will be used for decoder's first step.
-
+        # hidden state will be used for decoder's first step. return the tuple for LSTM case.
+        if self.model_type == "LSTM":
+            hidden = (hidden, cell)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################

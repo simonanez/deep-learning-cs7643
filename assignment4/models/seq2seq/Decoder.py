@@ -75,7 +75,10 @@ class Decoder(nn.Module):
         embedding = self.dropout(embedding)
 
         # embedding = (128, 1, 32)
-        output, hidden = self.rnn(embedding, hidden)
+        if self.model_type == "RNN":
+            output, hidden = self.rnn(embedding, hidden)
+        else:
+            output, hidden = self.rnn(embedding, hidden)
 
         #output.size = # 128, 1, 64
         output = torch.squeeze(output)
